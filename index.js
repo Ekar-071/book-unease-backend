@@ -1,20 +1,29 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
+
+import authRoutes from "./routes/auth.js";
+import livresRoutes from "./routes/livres.js";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Backend Book Unease OK 🔥");
-});
+// Test serveur
+app.get("/", (req, res) => res.send("Book Unease backend is running!"));
 
-app.get("/api/livres", (req, res) => {
-  res.json([
-    { id: 1, titre: "Zépi", type: "Roman", contenu: "Début du livre..." },
-    { id: 2, titre: "Le fruit du fils du Diable", type: "Manga", contenu: "Début du livre..." }
-  ]);
-});
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/livres", livresRoutes);
 
+// Connexion MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
+
+// Serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend lancé sur port ${PORT}`));

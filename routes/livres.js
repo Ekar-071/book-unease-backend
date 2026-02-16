@@ -1,20 +1,29 @@
 import express from "express";
-import { Book } from "../models/Book.js";
-import { authAdmin } from "../middleware/authAdmin.js";
+import Book from "../models/Book.js";
+import authAdmin from "../middleware/authAdmin.js";
 
 const router = express.Router();
 
-// Lister tous les livres (public)
+// Récupérer tous les livres
 router.get("/", async (req, res) => {
-  const books = await Book.find();
-  res.json(books);
+  try {
+    const livres = await Book.find();
+    res.json(livres);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-// Ajouter un livre (admin uniquement)
+// Créer un nouveau livre (admin uniquement)
 router.post("/", authAdmin, async (req, res) => {
-  const book = new Book({ ...req.body, authorId: req.user.id });
-  await book.save();
-  res.json(book);
+  const { titre, type, contenu } = req.body;
+  try {
+    const book = new Book({ titre, type, contenu });
+    await book.save();
+    res.status(201).json(book);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 export default router;

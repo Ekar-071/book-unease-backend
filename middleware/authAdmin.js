@@ -1,16 +1,17 @@
 import jwt from "jsonwebtoken";
 
-export const authAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer token
-  if (!token) return res.status(401).json({ error: "Token manquant" });
+export default function authAdmin(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Non autorisé" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== "admin") return res.status(403).json({ error: "Accès refusé" });
-
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ message: "Accès réservé à l'administrateur" });
+    }
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: "Token invalide" });
+    res.status(401).json({ message: "Token invalide" });
   }
-};
+}
